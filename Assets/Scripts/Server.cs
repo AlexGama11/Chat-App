@@ -66,6 +66,7 @@ public class Server : MonoBehaviour
                 int bytes = stream.Read(data, 0, data.Length);
                 msg = System.Text.Encoding.ASCII.GetString(data, 0, bytes);
                 Debug.Log("Server received a message: " + msg);
+                //UnityMainThreadDispatcher.Instance.Enqueue(OnMessageReceived?.Invoke(msg));
             }
             Thread.Sleep(100);
         }
