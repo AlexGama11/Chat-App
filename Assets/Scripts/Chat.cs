@@ -9,16 +9,21 @@ public class Chat : MonoBehaviour
     public TMP_InputField ChatInput;
     public string ChatMessage;
 
-    // Define an event for message received
-    public delegate void MessageReceivedEventHandler(string username, string message);
-    public static event MessageReceivedEventHandler OnMessageReceived;
-
     // Start is called before the first frame update
     private void Start()
     {
-        // Subscribe the DisplayMessage method to the OnMessageReceived event
-        OnMessageReceived += DisplayMessage;
+        if (Globals.IsServer)
+        {
+            // Subscribe the DisplayMessage method to the OnMessageReceived event
+            MyServer.OnMessageReceived += DisplayMessage;
+        }
 
+        else
+        {
+            // Subscribe the DisplayMessage method to the OnMessageReceived event
+            MyClient.OnMessageReceived += DisplayMessage;
+        }
+        
         // Add an event listener for the "Submit" event (Enter key) on the ChatInput
         ChatInput.onSubmit.AddListener(OnSubmit);
     }
@@ -33,11 +38,14 @@ public class Chat : MonoBehaviour
         {
             if (Globals.IsServer)
             {
+                //make it wait for the client before being able to send messages
+                //DisplayMessage(Globals.Username, ChatMessage);
                 await MyServer.Instance.SendDataAsync(Globals.Username + ":" + ChatMessage);
                 Debug.Log(Globals.Username + ": " + ChatMessage);
             }
             else
             {
+                //DisplayMessage(Globals.Username, ChatMessage);
                 await MyClient.Instance.SendDataAsync(Globals.Username + ":" + ChatMessage);
                 Debug.Log(Globals.Username + ": " + ChatMessage);
             }
@@ -68,26 +76,4 @@ public class Chat : MonoBehaviour
         SendMessage();
     }
     
-    private async void Update()
-    {
-        // Check for incoming messages regularly
-        if (Globals.IsServer)
-        {
-            (string receivedUsername, string receivedMessage) = await MyServer.Instance.ReceiveMessageAsync();
-            if (receivedMessage != null)
-            {
-                // Trigger the event when a message is received
-                OnMessageReceived?.Invoke(receivedUsername, receivedMessage);
-            }
-        }
-        else
-        {
-            (string receivedUsername, string receivedMessage) = await MyClient.Instance.ReceiveMessageAsync();
-            if (receivedMessage != null)
-            {
-                // Trigger the event when a message is received
-                OnMessageReceived?.Invoke(receivedUsername, receivedMessage);
-            }
-        }
-    }
 }

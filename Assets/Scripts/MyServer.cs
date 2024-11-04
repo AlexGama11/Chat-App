@@ -10,6 +10,10 @@ public class MyServer : MonoBehaviour
     private Thread _serverThread;
     private NetworkStream _stream = null;
 
+    // Define an event for message received
+    public delegate void MessageReceivedEventHandler(string username, string message);
+    public static event MessageReceivedEventHandler OnMessageReceived;
+
     private void Awake()
     {
         Instance = this;
@@ -74,6 +78,11 @@ public class MyServer : MonoBehaviour
             if (parts.Length == 2)
             {
                 return (parts[0], parts[1]);
+                
+                UnityMainThreadDispatcher.Instance().Enqueue(() =>
+                {
+                    OnMessageReceived?.Invoke(parts[0], parts[1]);
+                });
             }
         }
 

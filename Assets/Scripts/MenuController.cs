@@ -39,6 +39,11 @@ public class MenuController : MonoBehaviour
 
     public void HostServer()
     {
+        /*add wait until client connects, (make a menu for waiting), 
+        and make the chatview active once done. 
+        Can be done by having the middle menu and 
+        only a back button to cancel the operation.
+        Add back button that can end server processes as well. */
         GetInput();
         ServerObject.SetActive(true);
         _ = MyServer.Instance.CreateServerAsync();
